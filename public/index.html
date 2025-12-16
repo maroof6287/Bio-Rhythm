@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Bio-Rhythm</title>
+
+  <!-- Farcaster Mini App embed (and legacy frame) -->
+  <meta name="fc:miniapp" content="{&quot;version&quot;: &quot;1&quot;, &quot;imageUrl&quot;: &quot;https://example.com/assets/embed-3x2.png&quot;, &quot;button&quot;: {&quot;title&quot;: &quot;Bio-Rhythm&quot;, &quot;action&quot;: {&quot;type&quot;: &quot;launch_frame&quot;, &quot;url&quot;: &quot;https://example.com/&quot;, &quot;name&quot;: &quot;Bio-Rhythm&quot;, &quot;splashImageUrl&quot;: &quot;https://example.com/assets/splash.png&quot;, &quot;splashBackgroundColor&quot;: &quot;#020617&quot;}}}" />
+  <meta name="fc:frame" content="{&quot;version&quot;: &quot;1&quot;, &quot;imageUrl&quot;: &quot;https://example.com/assets/embed-3x2.png&quot;, &quot;button&quot;: {&quot;title&quot;: &quot;Bio-Rhythm&quot;, &quot;action&quot;: {&quot;type&quot;: &quot;launch_frame&quot;, &quot;url&quot;: &quot;https://example.com/&quot;, &quot;name&quot;: &quot;Bio-Rhythm&quot;, &quot;splashImageUrl&quot;: &quot;https://example.com/assets/splash.png&quot;, &quot;splashBackgroundColor&quot;: &quot;#020617&quot;}}}" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Bio-Rhythm" />
+  <meta property="og:description" content="A bioluminescent creature that reflects your daily rhythm—swipe to energize, rest to calm, and tip to support." />
+  <meta property="og:image" content="https://example.com/assets/hero.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://example.com/" />
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#020617" />
+
+  <style>
+    :root {
+      --bg:#020617; --indigo:#0b102f;
+      --cyan:#00ffe0; --mag:#ff00c8; --green:#50ff7a;
+      --glass: rgba(255,255,255,0.06);
+      --glass2: rgba(255,255,255,0.10);
+      --txt: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --shadow: 0 24px 60px rgba(0,0,0,0.45);
+      --r: 22px;
+    }
+    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    html,body{height:100%; margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: radial-gradient(1200px 800px at 30% 15%, #111a55 0%, var(--bg) 55%); color:var(--txt);}
+    body{overflow:hidden;}
+    .wrap{height:100%; display:flex; flex-direction:column; padding:18px 16px 18px; gap:14px; max-width:520px; margin:0 auto;}
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; flex-direction:column; gap:2px;}
+    .brand h1{font-size:18px; margin:0; letter-spacing:0.2px;}
+    .brand p{margin:0; font-size:12px; color:var(--muted);}
+    .pill{padding:8px 10px; border-radius:999px; background:rgba(0,255,224,0.08); border:1px solid rgba(0,255,224,0.20); font-size:12px; color:var(--cyan);}
+
+    .stage{flex:1; border-radius:var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border:1px solid rgba(255,255,255,0.10); box-shadow: var(--shadow); position:relative; overflow:hidden;}
+    canvas{width:100%; height:100%; display:block;}
+    .hint{position:absolute; left:14px; right:14px; bottom:14px; padding:12px 12px;
+      border-radius:16px; background:rgba(2,6,23,0.55); border:1px solid rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+      font-size:13px; color:rgba(255,255,255,0.78); display:flex; justify-content:space-between; gap:10px; align-items:center;}
+    .hint b{color:#fff}
+    .dot{width:8px; height:8px; border-radius:99px; background:var(--cyan); box-shadow: 0 0 18px rgba(0,255,224,0.8);}
+
+    /* Floating Tip button (no hard toolbar) */
+    .tipfab{position:absolute; top:14px; right:14px; width:44px; height:44px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.16); background: radial-gradient(circle at 30% 30%, rgba(255,0,200,0.18), rgba(0,255,224,0.10));
+      backdrop-filter: blur(10px); box-shadow: 0 18px 40px rgba(0,0,0,0.35); display:grid; place-items:center; cursor:pointer;}
+    .tipfab:active{transform: scale(0.98);}
+    .tipfab svg{width:22px; height:22px; opacity:0.95}
+
+    /* Modal */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:flex-end; justify-content:center; padding:14px;}
+    .overlay.show{display:flex;}
+    .sheet{width:min(520px,100%); border-radius:26px; background: linear-gradient(180deg, rgba(11,16,47,0.92), rgba(2,6,23,0.94));
+      border:1px solid rgba(255,255,255,0.14); box-shadow: 0 28px 80px rgba(0,0,0,0.6); overflow:hidden;}
+    .sheetHead{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; gap:10px;}
+    .sheetHead h2{margin:0; font-size:15px;}
+    .close{width:40px; height:40px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); display:grid; place-items:center; cursor:pointer;}
+    .close:active{transform: scale(0.98);}
+    .sheetBody{padding:0 14px 14px;}
+    .sub{margin:0 0 10px; font-size:12px; color:var(--muted); line-height:1.35}
+    .row{display:flex; gap:10px; flex-wrap:wrap;}
+    .amt{flex:1; min-width:70px; padding:10px 10px; border-radius:14px; border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.06); color:#fff; font-weight:650; text-align:center; cursor:pointer;}
+    .amt.active{border-color: rgba(0,255,224,0.45); background: rgba(0,255,224,0.10); color:var(--cyan);}
+    .input{margin-top:10px; width:100%; padding:12px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.05); color:#fff; font-size:14px; outline:none;}
+    .meta{display:flex; justify-content:space-between; gap:10px; margin-top:10px; padding:10px 12px;
+      border-radius:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10); font-size:12px; color:rgba(255,255,255,0.78);}
+    .btn{margin-top:12px; width:100%; padding:12px 12px; border-radius:16px; border:0;
+      background: linear-gradient(90deg, rgba(255,0,200,0.7), rgba(0,255,224,0.65));
+      color:#08101f; font-weight:800; font-size:14px; cursor:pointer;}
+    .btn[disabled]{opacity:0.5; cursor:not-allowed;}
+    .status{margin-top:8px; font-size:12px; color:rgba(255,255,255,0.78); min-height:16px;}
+    .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:18px; padding:10px 12px; border-radius:14px;
+      background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.14); color:#fff; font-size:13px; display:none; backdrop-filter: blur(10px);}
+    .toast.show{display:block;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Bio-Rhythm</h1>
+        <p id="envLine">Loading…</p>
+      </div>
+      <div class="pill" id="chainPill">Base</div>
+    </div>
+
+    <div class="stage" id="stage">
+      <canvas id="c"></canvas>
+
+      <button class="tipfab" id="tipBtn" aria-label="Tip">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 21s-7-4.4-9.5-8.7C.5 8.7 2.8 6 6 6c1.8 0 3.2 1 4 2.2C10.8 7 12.2 6 14 6c3.2 0 5.5 2.7 3.5 6.3C19 16.6 12 21 12 21Z" stroke="rgba(255,255,255,0.92)" stroke-width="1.6"/>
+        </svg>
+      </button>
+
+      <div class="hint" id="hint">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="dot" id="dot"></span>
+          <span><b>Liquid swipe</b> to energize • Hold to calm</span>
+        </div>
+        <span id="mood">Calm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tip modal -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Support Developer">
+    <div class="sheet">
+      <div class="sheetHead">
+        <div>
+          <h2>Support Developer</h2>
+          <div style="font-size:12px; color:rgba(255,255,255,0.68)">Your support keeps this creature glowing.</div>
+        </div>
+        <button class="close" id="closeBtn" aria-label="Close">✕</button>
+      </div>
+      <div class="sheetBody">
+        <p class="sub">Pick an amount or enter a custom tip. We send <b>USDC</b> on <b>Base</b>.</p>
+
+        <div class="row" id="presetRow">
+          <div class="amt" data-usdc="1">$1</div>
+          <div class="amt" data-usdc="5">$5</div>
+          <div class="amt" data-usdc="10">$10</div>
+          <div class="amt" data-usdc="25">$25</div>
+        </div>
+
+        <input class="input" id="custom" inputmode="decimal" placeholder="Or enter custom amount (e.g., 2.5)" />
+
+        <div class="meta">
+          <div><span style="opacity:.8">Payment</span><br><b>USDC</b></div>
+          <div style="text-align:right"><span style="opacity:.8">Network</span><br><b>Base</b></div>
+        </div>
+
+        <button class="btn" id="sendBtn">Send USDC</button>
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="/Bio-Rhythm-ui.js"></script>
+  <script type="module" src="/script.js"></script>
+</body>
+</html>
