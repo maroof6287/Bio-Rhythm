@@ -7,8 +7,8 @@ import { Attribution } from "https://esm.sh/ox/erc8021";
 // =========================
 // CONFIG (EDIT THESE)
 // =========================
-const BUILDER_CODE = "TODO_REPLACE_BUILDER_CODE"; // from base.dev → Settings → Builder Code
-const RECIPIENT = "0x0000000000000000000000000000000000000000"; // your address (where tips go)
+const BUILDER_CODE = "bc_3dguw1e9"; // from base.dev → Settings → Builder Code
+const RECIPIENT = "0x04514c3d1a7074E6972190A5632875F4d14785F8"; // your address (where tips go)
 
 // Base chain IDs
 const BASE_MAINNET = "0x2105";  // 8453
